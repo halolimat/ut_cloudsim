@@ -24,7 +24,7 @@ import java.util.Random;
 import org.cloudbus.cloudsim.Cloudlet;
 import org.cloudbus.cloudsim.Vm;
 
-public class CloudLetPSOScheduling {
+public class CloudLetPSOScheduling_back {
 
 	//number of VMs
 	int m;
@@ -90,8 +90,7 @@ public class CloudLetPSOScheduling {
 				
 				Cloudlet cloudlet = cloudletList.get(j);
 				
-				//arr[j] = (double) cloudlet.getCloudletLength() / vm.getMips();
-				arr[j] = (double) cloudlet.getCloudletLength() / vm.getHost().getTotalAllocatedMipsForVm(vm);
+				arr[j] = (double) cloudlet.getCloudletLength() / vm.getMips();
 			}
 
 			runTime.add(arr);
@@ -304,7 +303,7 @@ public class CloudLetPSOScheduling {
         		
         		//wil check for non assigned tasks
         		newPositionsMatrix = checkResourceAssignmentForNonAssignedTasks(newPositionsMatrix, assignedTasksArrayInPositionsMatrix);
-        		newPositionsMatrix = ReBalancePSO(newPositionsMatrix, runTime);
+        		//newPositionsMatrix = ReBalancePSO(newPositionsMatrix, runTime);
         		currParticle.positionsMatrix = newPositionsMatrix;
         		
         		//-------> done with new positions
@@ -331,121 +330,12 @@ public class CloudLetPSOScheduling {
                 //to add the new fitness to the average fitnesses array
                 double[] fitnessArrayInAvgFitnesses = averageFitnesses.get(l);
                 fitnessArrayInAvgFitnesses[iter] = newFitness;
-                //Added .. worse solutions
-                averageFitnesses.set(l, fitnessArrayInAvgFitnesses);
         	}
         }
         
        return returnVM2CloudLetArray(bestGlobalPositions);		
 	}
 	
-	private ArrayList<int[]> ReBalancePSO(ArrayList<int[]> newPositionsMatrix, ArrayList<double[]> runTime) {
-		
-		boolean done = false;
-		int counter = 0;
-		
-		while(!done){
-			
-			double[] sum = new double[m];
-
-			for (int i = 0; i < m; i++) {
-
-				double[] time = runTime.get(i);
-				int[] pos = newPositionsMatrix.get(i);
-
-				int n = pos.length;
-
-				for (int j = 0; j < n; j++) {
-					if (pos[j] == 1) {
-						sum[i] = sum[i] + time[j];
-					}
-				}
-			}
-			
-			int heavestVMLoad = 0;
-			int lightestVMLoad = 0;
-			
-			for(int i = 1 ; i < m; i++){
-				if(sum[heavestVMLoad] < sum[i]){
-					heavestVMLoad = i;
-				}
-				
-				if(sum[lightestVMLoad] > sum[i]){
-					lightestVMLoad = i;
-				}
-			}
-			
-			//System.out.println("heavestVMLoad = "+heavestVMLoad);
-			//System.out.println("lightestVMLoad = "+lightestVMLoad);
-			
-			int[] HeavestPOS = newPositionsMatrix.get(heavestVMLoad);
-			
-			//for(int i = 0 ; i < HeavestPOS.length ; i++){
-				//System.out.print(i+1+"\t");
-			//}
-			
-			//System.out.println();
-			
-			//for(int i = 0 ; i < HeavestPOS.length ; i++){
-			//	System.out.print(HeavestPOS[i]+"\t");
-			//}
-			
-			//System.out.println();
-			
-			int[] LightestPOS = newPositionsMatrix.get(lightestVMLoad);
-			
-			//for(int i = 0 ; i < LightestPOS.length ; i++){
-			//	System.out.print(LightestPOS[i]+"\t");
-			//}
-			
-			//System.out.println();
-			
-			//System.out.println("BEFORE:");
-			//for (int i = 0; i < m; i++) {
-			//	System.out.println("sum[" + i+"] = "+sum[i]);
-			//}
-			
-			//-------------------------------------------------
-			
-			for(int i = 0 ; i < HeavestPOS.length ; i++){
-				int cloudletNumberOnHeavest = 0;
-				
-				if(HeavestPOS[i] == 1){
-					cloudletNumberOnHeavest = i;
-				}
-				
-				double heavestMinusThisCloudlet = sum[heavestVMLoad] - HeavestPOS[cloudletNumberOnHeavest];
-				double LightestPlusThisCloudlet = sum[lightestVMLoad] + LightestPOS[cloudletNumberOnHeavest];
-				
-				if(heavestMinusThisCloudlet < LightestPlusThisCloudlet){
-					break;
-				}
-				
-				else{
-					HeavestPOS[cloudletNumberOnHeavest] = 0;
-					LightestPOS[cloudletNumberOnHeavest] = 1;					
-					newPositionsMatrix.set(heavestVMLoad, HeavestPOS);
-					newPositionsMatrix.set(lightestVMLoad, LightestPOS);
-				}
-			}
-			
-			//-------------------------------------------------
-			
-			//System.out.println("\nAFTER:");
-			//for (int i = 0; i < m; i++) {
-			//	System.out.println("sum[" + i+"] = "+sum[i]);
-			//}
-			
-			if(counter == 3){
-				done = true;
-			}
-			
-			counter++;
-		}
-		
-		return newPositionsMatrix;
-	}
-
 	/**
 	 * will calculate the RIW according to 
 	 * (A new particle swarm optimization algorithm with random inertia weight and evolution strategy: paper)
@@ -620,5 +510,112 @@ public class CloudLetPSOScheduling {
 		}
 
 		return newArrList;
+	}
+	
+private ArrayList<int[]> ReBalancePSO(ArrayList<int[]> newPositionsMatrix, ArrayList<double[]> runTime) {
+		
+		boolean done = false;
+		int counter = 0;
+		
+		while(!done){
+			
+			double[] sum = new double[m];
+
+			for (int i = 0; i < m; i++) {
+
+				double[] time = runTime.get(i);
+				int[] pos = newPositionsMatrix.get(i);
+
+				int n = pos.length;
+
+				for (int j = 0; j < n; j++) {
+					if (pos[j] == 1) {
+						sum[i] = sum[i] + time[j];
+					}
+				}
+			}
+			
+			int heavestVMLoad = 0;
+			int lightestVMLoad = 0;
+			
+			for(int i = 1 ; i < m; i++){
+				if(sum[heavestVMLoad] < sum[i]){
+					heavestVMLoad = i;
+				}
+				
+				if(sum[lightestVMLoad] > sum[i]){
+					lightestVMLoad = i;
+				}
+			}
+			
+			//System.out.println("heavestVMLoad = "+heavestVMLoad);
+			//System.out.println("lightestVMLoad = "+lightestVMLoad);
+			
+			int[] HeavestPOS = newPositionsMatrix.get(heavestVMLoad);
+			
+			//for(int i = 0 ; i < HeavestPOS.length ; i++){
+				//System.out.print(i+1+"\t");
+			//}
+			
+			//System.out.println();
+			
+			//for(int i = 0 ; i < HeavestPOS.length ; i++){
+			//	System.out.print(HeavestPOS[i]+"\t");
+			//}
+			
+			//System.out.println();
+			
+			int[] LightestPOS = newPositionsMatrix.get(lightestVMLoad);
+			
+			//for(int i = 0 ; i < LightestPOS.length ; i++){
+			//	System.out.print(LightestPOS[i]+"\t");
+			//}
+			
+			//System.out.println();
+			
+			//System.out.println("BEFORE:");
+			//for (int i = 0; i < m; i++) {
+			//	System.out.println("sum[" + i+"] = "+sum[i]);
+			//}
+			
+			//-------------------------------------------------
+			
+			for(int i = 0 ; i < HeavestPOS.length ; i++){
+				int cloudletNumberOnHeavest = 0;
+				
+				if(HeavestPOS[i] == 1){
+					cloudletNumberOnHeavest = i;
+				}
+				
+				double heavestMinusThisCloudlet = sum[heavestVMLoad] - HeavestPOS[cloudletNumberOnHeavest];
+				double LightestPlusThisCloudlet = sum[lightestVMLoad] + LightestPOS[cloudletNumberOnHeavest];
+				
+				if(heavestMinusThisCloudlet < LightestPlusThisCloudlet){
+					break;
+				}
+				
+				else{
+					HeavestPOS[cloudletNumberOnHeavest] = 0;
+					LightestPOS[cloudletNumberOnHeavest] = 1;					
+					newPositionsMatrix.set(heavestVMLoad, HeavestPOS);
+					newPositionsMatrix.set(lightestVMLoad, LightestPOS);
+				}
+			}
+			
+			//-------------------------------------------------
+			
+			//System.out.println("\nAFTER:");
+			//for (int i = 0; i < m; i++) {
+			//	System.out.println("sum[" + i+"] = "+sum[i]);
+			//}
+			
+			if(counter == 3){
+				done = true;
+			}
+			
+			counter++;
+		}
+		
+		return newPositionsMatrix;
 	}
 }

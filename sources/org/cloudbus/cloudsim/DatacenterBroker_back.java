@@ -36,7 +36,7 @@ import ut.CloudLetPSOScheduling;
  * @author Anton Beloglazov
  * @since CloudSim Toolkit 1.0
  */
-public class DatacenterBroker extends SimEntity {
+public class DatacenterBroker_back extends SimEntity {
 
 	/** The vm list. */
 	protected List<? extends Vm> vmList;
@@ -88,7 +88,7 @@ public class DatacenterBroker extends SimEntity {
 	 * @pre name != null
 	 * @post $none
 	 */
-	public DatacenterBroker(String name) throws Exception {
+	public DatacenterBroker_back(String name) throws Exception {
 		super(name);
 
 		setVmList(new ArrayList<Vm>());

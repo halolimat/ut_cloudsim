@@ -432,7 +432,7 @@ public class WorkloadFileReader implements WorkloadModel {
 			//this code should be changed; when using different workload, or
 			//deleted in case we want to simulate the whole workload
 			
-			int numberOfCloudLets = 20;
+			int numberOfCloudLets = 100;
 			// x: number of lines where each line is a cloudlet,
 			// 30 more were added because HPC2N-2002-2.1-cln.swf has 30 comment lines
 			int x = numberOfCloudLets + 30;
