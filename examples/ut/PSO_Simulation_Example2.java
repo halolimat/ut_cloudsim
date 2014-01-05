@@ -361,7 +361,7 @@ public class PSO_Simulation_Example2 {
 
 		// Read Cloudlets from workload file in the swf format
 		WorkloadFileReader workloadFileReader = new WorkloadFileReader(
-				"Simulation Files/HPC2N-2002-2.1-cln.swf", 1);
+				"Simulation Files/NASA-iPSC-1993-3.1-cln.swf", 1);
 
 		// generate cloudlets from workload file
 		cloudletList = workloadFileReader.generateWorkload();

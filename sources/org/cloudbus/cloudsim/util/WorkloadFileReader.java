@@ -4,11 +4,6 @@
  * Licence:      GPL - http://www.gnu.org/copyleft/gpl.html
  *
  * Copyright (c) 2009-2012, The University of Melbourne, Australia
- * 
- * Edited by: Hussein S. Al-Olimat
- * email: hussein.alolimat@msn.com 
- * University of Toledo 2013
- * 
  */
 
 package org.cloudbus.cloudsim.util;
@@ -92,7 +87,8 @@ public class WorkloadFileReader implements WorkloadModel {
 
 	private final int GROUP_ID = 13 - 1; // if of group of the user who
 
-	// submitted the job
+	// submitted the
+	// job
 	private int MAX_FIELD = 18; // max number of field in the trace file
 
 	private String COMMENT = ";"; // a string that denotes the start of a
@@ -101,7 +97,7 @@ public class WorkloadFileReader implements WorkloadModel {
 	private static final int IRRELEVANT = -1; // irrelevant number
 
 	private String[] fieldArray = null; // a temp array storing all the fields
-	
+
 	/**
 	 * Create a new {@link WorkloadFileReader} object.
 	 * 
@@ -119,7 +115,6 @@ public class WorkloadFileReader implements WorkloadModel {
 	 * @post $none
 	 */
 	public WorkloadFileReader(final String fileName, final int rating) throws FileNotFoundException {
-		
 		if (fileName == null || fileName.length() == 0) {
 			throw new IllegalArgumentException("Invalid trace file name.");
 		} else if (rating <= 0) {
@@ -269,45 +264,27 @@ public class WorkloadFileReader implements WorkloadModel {
 	 * @pre numProc > 0
 	 * @post $none
 	 */
-	private void createJob(final int id, final long submitTime, final int runTime, 
-			final int numProc, final int reqRunTime, final int userID, final int groupID) {
-		
+	private void createJob(
+			final int id,
+			final long submitTime,
+			final int runTime,
+			final int numProc,
+			final int reqRunTime,
+			final int userID,
+			final int groupID) {
 		// create the cloudlet
-		
-		//length (exection time of a job) = run time in second * how many instruction executed per second
-		// for example 1000 seconds * 1 per second = 1000 instructions the length of the job
 		final int len = runTime * rating;
-		
 		UtilizationModel utilizationModel = new UtilizationModelFull();
-		
-		final Cloudlet wgl = new Cloudlet(id, len, numProc,	0, 0, utilizationModel, 
-				utilizationModel, utilizationModel);
-		
-		//UT_Edit
-		wgl.setUserId(userID);
-		
+		final Cloudlet wgl = new Cloudlet(
+				id,
+				len,
+				numProc,
+				0,
+				0,
+				utilizationModel,
+				utilizationModel,
+				utilizationModel);
 		jobs.add(wgl);
-		
-		/*
-		  	int id = 4; //Job number [1]
-			int len = runTime * rating; // Run Time [4]* 1 ... (execution time)
-			int numProc = 2; //requested number of processors [8]
-			UtilizationModel utilizationModel = new UtilizationModelFull();
-		
-			Cloudlet(id, len, numProc,	0, 0, utilizationModel, utilizationModel, utilizationModel);
-			
-			(vs.)
-			
-			int id = 0;
-			pesNumber=1;
-			long length = 250000;// in million instruction
-			long fileSize = 300;
-			long outputSize = 300;
-			UtilizationModel utilizationModel = new UtilizationModelFull();
-	
-			Cloudlet(id, length, pesNumber, fileSize, outputSize, utilizationModel, utilizationModel, utilizationModel);
-					 
-		 */
 	}
 
 	/**
@@ -425,20 +402,9 @@ public class WorkloadFileReader implements WorkloadModel {
 		try {
 			reader = new BufferedReader(new InputStreamReader(new FileInputStream(fl)));
 
-			// read one line at a time
+			// read one line at the time
 			int line = 1;
-			
-			//UT_Edit --------------------(to read only small number of the whole workload)
-			//this code should be changed; when using different workload, or
-			//deleted in case we want to simulate the whole workload
-			
-			int numberOfCloudLets = 100;
-			// x: number of lines where each line is a cloudlet,
-			// 30 more were added because HPC2N-2002-2.1-cln.swf has 30 comment lines
-			int x = numberOfCloudLets + 30;
-			
-			//number of cloudlets + (30- the number of comment lines in the worklaod file) 
-			while (reader.ready() && line <= x) {
+			while (reader.ready()) {
 				parseValue(reader.readLine(), line);
 				line++;
 			}
@@ -502,7 +468,6 @@ public class WorkloadFileReader implements WorkloadModel {
 			// ZipFile offers an Enumeration of all the files in the file
 			zipFile = new ZipFile(fl);
 			final Enumeration<? extends ZipEntry> e = zipFile.entries();
-			
 			while (e.hasMoreElements()) {
 				success = false; // reset the value again
 				final ZipEntry zipEntry = e.nextElement();
@@ -511,10 +476,9 @@ public class WorkloadFileReader implements WorkloadModel {
 
 				// read one line at the time
 				int line = 1;
-				
 				while (reader.ready()) {
 					parseValue(reader.readLine(), line);
-					line++;					
+					line++;
 				}
 
 				reader.close();

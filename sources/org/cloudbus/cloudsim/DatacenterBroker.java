@@ -4,11 +4,6 @@
  * Licence:      GPL - http://www.gnu.org/copyleft/gpl.html
  *
  * Copyright (c) 2009-2012, The University of Melbourne, Australia
- * 
- * Edited by: Hussein S. Al-Olimat
- * email: hussein.alolimat@msn.com
- * University of Toledo, Toledo, OH
- * 
  */
 
 package org.cloudbus.cloudsim;
@@ -109,6 +104,35 @@ public class DatacenterBroker extends SimEntity {
 		setVmsToDatacentersMap(new HashMap<Integer, Integer>());
 		setDatacenterCharacteristicsList(new HashMap<Integer, DatacenterCharacteristics>());
 	}
+	
+	/**
+	 * UT_Edit
+	 * 
+	 * Implements PSO to re arrange the cloudLets and bind them to specific VMs
+	 * 
+	 * @param cloudletList: the list of cloudlets to reschedule
+	 * @param vmlist: list of all available virtual machines
+	 * @param brokerId: the Id of the broker/user id
+	 * 
+	 * @return list of modified cloudlet list
+	 */
+	public void psoScheduling(){
+		
+		if(usePSO){
+			
+			CloudLetPSOScheduling a = new CloudLetPSOScheduling();
+			
+			//will retrieve the solution by PSO as an array of integers
+			//where every element in the array is the VM-ID
+			//and array index is the cloudlet number in the list
+			int[] newPostitionsOnVMs = a.getScheduledCloudLets(cloudletList, vmList);
+			
+			for(int i = 0 ; i < cloudletList.size(); i++){
+				cloudletList.get(i).setVmId(newPostitionsOnVMs[i]);
+			}
+			
+		}
+	}
 
 	/**
 	 * This method is used to send to the broker the list with virtual machines that must be
@@ -146,39 +170,6 @@ public class DatacenterBroker extends SimEntity {
 		CloudletList.getById(getCloudletList(), cloudletId).setVmId(vmId);
 	}
 
-	/*
-	 * 
-	 */
-	
-	/**
-	 * UT_Edit
-	 * 
-	 * Implements PSO to re arrange the cloudLets and bind them to specific VMs
-	 * 
-	 * @param cloudletList: the list of cloudlets to reschedule
-	 * @param vmlist: list of all available virtual machines
-	 * @param brokerId: the Id of the broker/user id
-	 * 
-	 * @return list of modified cloudlet list
-	 */
-	public void psoScheduling(){
-		
-		if(usePSO){
-			
-			CloudLetPSOScheduling a = new CloudLetPSOScheduling();
-			
-			//will retrieve the solution by PSO as an array of integers
-			//where every element in the array is the VM-ID
-			//and array index is the cloudlet number in the list
-			int[] newPostitionsOnVMs = a.getScheduledCloudLets(cloudletList, vmList);
-			
-			for(int i = 0 ; i < cloudletList.size(); i++){
-				cloudletList.get(i).setVmId(newPostitionsOnVMs[i]);
-			}
-			
-		}
-	}
-	
 	/**
 	 * Processes events available for this Broker.
 	 * 
@@ -314,8 +305,8 @@ public class DatacenterBroker extends SimEntity {
 	protected void processCloudletReturn(SimEvent ev) {
 		Cloudlet cloudlet = (Cloudlet) ev.getData();
 		getCloudletReceivedList().add(cloudlet);
-		
-		Log.printLine(CloudSim.clock() + ": " + getName() + ": Cloudlet " + cloudlet.getCloudletId() + " received");
+		Log.printLine(CloudSim.clock() + ": " + getName() + ": Cloudlet " + cloudlet.getCloudletId()
+				+ " received");
 		cloudletsSubmitted--;
 		if (getCloudletList().size() == 0 && cloudletsSubmitted == 0) { // all cloudlets executed
 			Log.printLine(CloudSim.clock() + ": " + getName() + ": All Cloudlets executed. Finishing...");
@@ -383,7 +374,6 @@ public class DatacenterBroker extends SimEntity {
 	 * @post $none
 	 */
 	protected void submitCloudlets() {
-		
 		psoScheduling();
 		
 		int vmIndex = 0;
@@ -393,7 +383,6 @@ public class DatacenterBroker extends SimEntity {
 			if (cloudlet.getVmId() == -1) {
 				vm = getVmsCreatedList().get(vmIndex);
 			} else { // submit to the specific vm
-				
 				vm = VmList.getById(getVmsCreatedList(), cloudlet.getVmId());
 				if (vm == null) { // vm was not created
 					Log.printLine(CloudSim.clock() + ": " + getName() + ": Postponing execution of cloudlet "
@@ -402,15 +391,11 @@ public class DatacenterBroker extends SimEntity {
 				}
 			}
 
-			Log.printLine(CloudSim.clock() + ": " + getName() + ": Sending cloudlet " + cloudlet.getCloudletId() + " to VM #" + vm.getId());
+			Log.printLine(CloudSim.clock() + ": " + getName() + ": Sending cloudlet "
+					+ cloudlet.getCloudletId() + " to VM #" + vm.getId());
 			cloudlet.setVmId(vm.getId());
-			
-			// ( dataCenterID , 21 , cloudLet )
 			sendNow(getVmsToDatacentersMap().get(vm.getId()), CloudSimTags.CLOUDLET_SUBMIT, cloudlet);
-			
 			cloudletsSubmitted++;
-			
-			//set the next id of the vm to randomly set it to the next cloudLet --> RoundRobin
 			vmIndex = (vmIndex + 1) % getVmsCreatedList().size();
 			getCloudletSubmittedList().add(cloudlet);
 		}
@@ -703,8 +688,9 @@ public class DatacenterBroker extends SimEntity {
 	protected void setDatacenterRequestedIdsList(List<Integer> datacenterRequestedIdsList) {
 		this.datacenterRequestedIdsList = datacenterRequestedIdsList;
 	}
-
+	
 	public void UsePSO(){
 		usePSO = true;
 	}
+
 }
